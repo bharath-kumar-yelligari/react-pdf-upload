@@ -1,10 +1,10 @@
 import './App.css';
-import PdfUploadDownload from './PdfUploadDownload';
+import PdfManager from './PdfManager';
 
 function App() {
   return (
     <div className="App">
-      <PdfUploadDownload></PdfUploadDownload>
+      <PdfManager></PdfManager>
     </div>
   );
 }
