@@ -51,6 +51,15 @@
     cursor: pointer;
     transition: background-color 0.3s;
 
+    span {
+      max-width: 250px;
+      min-width: 250px;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
 
     .pdf-list-item {
       display: flex;

@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 function PdfManager() {
   const [pdfFiles, setPdfFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewFile, setPreviewFile] = useState({});
 
   useEffect(() => {
     fetch('http://localhost:3001/pdfFiles')
       .then(response => response.json())
-      .then(data => setPdfFiles(data))
+      .then(data => {
+        setPdfFiles(data)
+        setPreviewFile(data[0])
+      })
       .catch(error => console.error('Error fetching data:', error));
   }, []);
 
@@ -19,6 +24,10 @@ function PdfManager() {
       alert('Please upload a valid PDF file.');
     }
   };
+
+  const handlePreview = (file) => {
+    setPreviewFile(file)
+  }
 
   const handleUpload = () => {
     if (!selectedFile) {
@@ -44,7 +53,8 @@ function PdfManager() {
         .then(data => {
           setPdfFiles([...pdfFiles, data]);
           setSelectedFile(null);
-          alert('File uploaded successfully!');
+          setPreviewFile(data)
+          handleToast('File uploaded successfully!')
         })
         .catch(error => console.error('Error uploading file:', error));
     };
@@ -65,10 +75,25 @@ function PdfManager() {
     })
       .then(() => {
         setPdfFiles(pdfFiles.filter(file => file.id !== id));
-        alert('File deleted successfully!');
+        handleToast('File deleted successfully!')
+        if (id === previewFile.id) {
+          setPreviewFile(pdfFiles[0])
+        }
       })
       .catch(error => console.error('Error deleting file:', error));
   };
+
+  const handleToast = (msg) => {
+    toast.success(msg, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "colored",
+    });
+  }
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
@@ -88,16 +113,16 @@ function PdfManager() {
             <div className='pdf-list-div'>
               {pdfFiles.map((file) => (
                 <div className='pdf-list-item' key={file.id} style={{ marginBottom: '10px' }}>
-                  {file.name}
-                  <i className="fas fa-download" onClick={() => handleDownload(file.url, file.name)}></i>
-                  <i className="fas fa-trash-alt" onClick={() => handleDelete(file.id)}></i>
+                  <span style={{ color: (previewFile.id === file.id) ? "#2424c1" : "inherit" }} onClick={() => handlePreview(file)}>{file.name}</span>
+                  <i className="fas fa-download" style={{ color: "#2a2ab5" }} onClick={() => handleDownload(file.url, file.name)}></i>
+                  <i className="fas fa-trash-alt" style={{ color: "#d32a2a" }} onClick={() => handleDelete(file.id)}></i>
                 </div>
               ))}
             </div>
             <div className='iframe-container'>
               <iframe
-                src={pdfFiles[0].url}
-                title={pdfFiles[0].name}
+                src={previewFile.url}
+                title={previewFile.name}
                 width="100%"
                 height="200px"
                 style={{ border: '1px solid #ccc', marginTop: '10px' }}
