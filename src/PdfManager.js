@@ -18,10 +18,17 @@ function PdfManager() {
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      setSelectedFile(file);
-    } else {
-      alert('Please upload a valid PDF file.');
+    if (file) {
+      if (file.size > 1 * 1024 * 1024) {
+        setSelectedFile(null);
+        handleToast('error', 'File size exceeds 0.5MB. Please upload a smaller file.')
+        return;
+      }
+      if (file && file.type === 'application/pdf') {
+        setSelectedFile(file);
+      } else {
+        alert('Please upload a valid PDF file.');
+      }
     }
   };
 
@@ -54,7 +61,7 @@ function PdfManager() {
           setPdfFiles([...pdfFiles, data]);
           setSelectedFile(null);
           setPreviewFile(data)
-          handleToast('File uploaded successfully!')
+          handleToast('success', 'File uploaded successfully!')
         })
         .catch(error => console.error('Error uploading file:', error));
     };
@@ -75,7 +82,7 @@ function PdfManager() {
     })
       .then(() => {
         setPdfFiles(pdfFiles.filter(file => file.id !== id));
-        handleToast('File deleted successfully!')
+        handleToast('success', 'File deleted successfully!')
         if (id === previewFile.id) {
           setPreviewFile(pdfFiles[0])
         }
@@ -83,8 +90,8 @@ function PdfManager() {
       .catch(error => console.error('Error deleting file:', error));
   };
 
-  const handleToast = (msg) => {
-    toast.success(msg, {
+  const handleToast = (type, msg) => {
+    let toastOptions = {
       position: "top-right",
       autoClose: 3000,
       hideProgressBar: false,
@@ -92,7 +99,9 @@ function PdfManager() {
       pauseOnHover: true,
       draggable: true,
       theme: "colored",
-    });
+    };
+
+    (type === "success") ? toast.success(msg, toastOptions) : toast.error(msg, toastOptions);
   }
 
   return (
